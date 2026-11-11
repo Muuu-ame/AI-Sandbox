@@ -1,0 +1,13 @@
+# Unity generated files
+AI-Sandbox_Unity/Library/
+AI-Sandbox_Unity/Temp/
+AI-Sandbox_Unity/Obj/
+AI-Sandbox_Unity/Build/
+AI-Sandbox_Unity/Builds/
+AI-Sandbox_Unity/Logs/
+AI-Sandbox_Unity/UserSettings/
+
+# Python
+Python/.venv/
+Python/__pycache__/
+Python/*.pyc
