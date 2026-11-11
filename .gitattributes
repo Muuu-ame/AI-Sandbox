@@ -1,0 +1,28 @@
+
+# Unity source files
+*.cginc text
+*.compute text linguist-language=hlsl
+*.cs text diff=csharp
+*.hlsl text linguist-language=hlsl
+*.raytrace text linguist-language=hlsl
+*.shader text
+
+# Unity JSON files
+*.asmdef text linguist-language=json
+*.asmref text linguist-language=json
+*.inputactions text linguist-language=json
+*.shadergraph text linguist-language=json
+*.shadersubgraph text linguist-language=json
+
+# Unity YAML files
+*.anim text
+*.asset text
+*.controller text
+*.mat text
+*.meta text
+*.prefab text
+*.unity text
+*.physicMaterial text
+*.physicsMaterial2D text
+
+# No Git LFS

@@ -1,0 +1,36 @@
+
+# Unity generated files
+AI-Sandbox_Unity/Library/
+AI-Sandbox_Unity/Temp/
+AI-Sandbox_Unity/Obj/
+AI-Sandbox_Unity/Build/
+AI-Sandbox_Unity/Builds/
+AI-Sandbox_Unity/Logs/
+AI-Sandbox_Unity/UserSettings/
+
+# Unity generated files
+AI-Sandbox_Unity/MemoryCaptures/
+AI-Sandbox_Unity/Recordings/
+
+# IDE
+.vs/
+.idea/
+.gradle/
+*.csproj
+*.sln
+*.slnx
+*.user
+*.userprefs
+*.suo
+*.tmp
+
+# Python
+Python/.venv/
+Python/__pycache__/
+Python/*.pyc
+*.py[cod]
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
