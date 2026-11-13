@@ -1,12 +1,13 @@
-
+using Newtonsoft.Json.Linq;
 using System;
+using System.Xml.Linq;
 using UnityEngine;
 
-[Serializable]
+[System.Serializable]
 public class GameCommand
 {
     public string type;
-    public CommandParameters parameters;
+    public JObject parameters;
 }
 
 [Serializable]
