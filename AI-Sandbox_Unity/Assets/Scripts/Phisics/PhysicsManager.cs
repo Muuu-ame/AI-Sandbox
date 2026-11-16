@@ -15,11 +15,14 @@ public class PhysicsManager : MonoBehaviour
     [SerializeField]
     private CustomPhysicsSolver customSolver;
 
-
     // 物理演算モード切り替え
     public void SetPhysicsMode(PhysicsMode mode)
     {
         currentMode = mode;
+
+        customSolver?.SetBodiesPhysicsMode(
+            currentMode == PhysicsMode.Custom
+        );
     }
 
 
@@ -42,7 +45,7 @@ public class PhysicsManager : MonoBehaviour
         }
         else
         {
-            // 独自物理側の重力設定は後で実装
+            customSolver.Gravity = gravity;
         }
     }
 
@@ -75,8 +78,8 @@ public class PhysicsManager : MonoBehaviour
     }
 
 
-    // 個別の角速度減衰
-    public void SetAngularDamping(Rigidbody rb, float angularDamping)
+// 個別の角速度減衰
+public void SetAngularDamping(Rigidbody rb, float angularDamping)
     {
         if (currentMode == PhysicsMode.UnityStandard)
         {
@@ -157,5 +160,76 @@ public class PhysicsManager : MonoBehaviour
         if (currentMode != PhysicsMode.UnityStandard || col == null) return;
 
         col.material.bounciness = bounciness;
+    }
+    public void RegisterCustomBody(PhysicsBody body)
+    {
+        if (body == null) return;
+
+        customSolver?.RegisterBody(body);
+
+        body.SetCustomPhysics(
+            currentMode == PhysicsMode.Custom
+        );
+    }
+
+    public void UnregisterCustomBody(PhysicsBody body)
+    {
+        if (body == null) return;
+
+        customSolver?.UnregisterBody(body);
+
+        body.SetCustomPhysics(false);
+    }
+
+    public void SetMass(PhysicsBody body, float mass)
+    {
+        if (body == null) return;
+
+        if (currentMode == PhysicsMode.UnityStandard)
+        {
+            Debug.LogWarning("PhysicsBodyの質量変更エラー: UnityStandardモードでは質量を変更できません");
+            return;
+        }
+
+        body.SetMass(mass);
+    }
+    public void ApplyForce(PhysicsBody body, Vector3 force)
+    {
+        if (body == null) return;
+
+        if (currentMode == PhysicsMode.Custom)
+        {
+            body.ApplyForce(force);
+        }
+    }
+
+    public void SetVelocity(PhysicsBody body, Vector3 velocity)
+    {
+        if (body == null) return;
+
+        if (currentMode == PhysicsMode.Custom)
+        {
+            body.Velocity = velocity;
+        }
+    }
+
+    public Vector3 GetVelocity(PhysicsBody body)
+    {
+        if (body == null) return Vector3.zero;
+
+        if (currentMode == PhysicsMode.Custom)
+        {
+            return body.Velocity;
+        }
+
+        return Vector3.zero;
+    }
+
+    public void SetAngularDamping(PhysicsBody body, float damping)
+    {
+        if (body == null) return;
+        if (currentMode != PhysicsMode.Custom) return;
+
+        body.AngularDamping = damping;
     }
 }

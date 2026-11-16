@@ -680,6 +680,8 @@ GameObject:
   m_Component:
   - component: {fileID: 786176353}
   - component: {fileID: 786176352}
+  - component: {fileID: 786176355}
+  - component: {fileID: 786176354}
   m_Layer: 0
   m_Name: PhysicsManager
   m_TagString: Untagged
@@ -699,6 +701,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 02a6dbd7ae2144f479c9325323f77f02, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PhysicsManager
+  currentMode: 1
+  standardSolver: {fileID: 786176355}
+  customSolver: {fileID: 786176354}
 --- !u!4 &786176353
 Transform:
   m_ObjectHideFlags: 0
@@ -714,6 +719,30 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &786176354
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 786176351}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bcaf33f3e85837c49beb66de005f2c49, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CustomPhysicsSolver
+--- !u!114 &786176355
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 786176351}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3498415896a24f49b7e966166095fb9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StandardPhysicsSolver
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
