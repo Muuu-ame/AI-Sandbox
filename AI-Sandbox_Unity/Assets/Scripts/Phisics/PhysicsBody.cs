@@ -94,5 +94,10 @@ public class PhysicsBody : MonoBehaviour
         get => angularVelocity;
         set => angularVelocity = value;
     }
-}
+    public void ApplyTorque(Vector3 torque)
+    {
+        if (Mathf.Approximately(mass, 0f)) return;
 
+        angularVelocity += torque / Mathf.Abs(mass);
+    }
+}

@@ -232,4 +232,11 @@ public void SetAngularDamping(Rigidbody rb, float angularDamping)
 
         body.AngularDamping = damping;
     }
+    public void ApplyTorque(PhysicsBody body, Vector3 torque)
+    {
+        if (body == null) return;
+        if (currentMode != PhysicsMode.Custom) return;
+
+        body.ApplyTorque(torque);
+    }
 }
