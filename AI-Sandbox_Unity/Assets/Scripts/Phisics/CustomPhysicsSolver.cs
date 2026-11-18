@@ -8,6 +8,16 @@ public class CustomPhysicsSolver : MonoBehaviour
     [SerializeField]
     private Vector3 gravity = new Vector3(0f, -9.81f, 0f);
 
+    [Header("Collision Detection")]
+    [SerializeField] private BroadPhaseManager broadPhaseManager;
+
+    private CollisionDetector collisionDetector = new();
+
+    private readonly List<CollisionInfo> detectedCollisions = new();
+
+    public IReadOnlyList<CollisionInfo> DetectedCollisions
+        => detectedCollisions;
+
     public Vector3 Gravity
     {
         get => gravity;
@@ -66,6 +76,7 @@ public class CustomPhysicsSolver : MonoBehaviour
             // 加速度をリセット
             body.ResetAcceleration();
         }
+        DetectCollisions();
     }
     public void SetBodiesPhysicsMode(bool enabled)
     {
@@ -74,6 +85,29 @@ public class CustomPhysicsSolver : MonoBehaviour
             if (body == null) continue;
 
             body.SetCustomPhysics(enabled);
+        }
+    }
+
+    private void DetectCollisions()
+    {
+        detectedCollisions.Clear();
+
+        if (broadPhaseManager == null)
+            return;
+
+        // Broad Phaseで衝突候補を取得
+        var candidates = broadPhaseManager.GenerateCandidates(bodies);
+
+        // Narrow Phaseで実際の衝突を判定
+        foreach (CollisionCandidate candidate in candidates)
+        {
+            if (collisionDetector.TryDetect(
+                candidate.BodyA,
+                candidate.BodyB,
+                out CollisionInfo info))
+            {
+                detectedCollisions.Add(info);
+            }
         }
     }
 }

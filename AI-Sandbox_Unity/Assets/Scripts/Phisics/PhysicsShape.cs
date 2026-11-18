@@ -52,4 +52,20 @@ public class PhysicsShape : MonoBehaviour
             return new Bounds(WorldCenter, worldSize);
         }
     }
+
+    public float Radius
+    {
+        get
+        {
+            Vector3 scale = transform.lossyScale;
+
+            float maxScale = Mathf.Max(
+                Mathf.Abs(scale.x),
+                Mathf.Abs(scale.y),
+                Mathf.Abs(scale.z)
+            );
+
+            return Size.x * 0.5f * maxScale;
+        }
+    }
 }
