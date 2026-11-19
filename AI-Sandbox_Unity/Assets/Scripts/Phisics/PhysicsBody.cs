@@ -2,10 +2,7 @@ using UnityEngine;
 
 public class PhysicsBody : MonoBehaviour
 {
-    public void SetMass(float value)
-    {
-        mass = value;
-    }
+    
     private Rigidbody rb;
     private bool originalKinematic;
 
@@ -18,6 +15,18 @@ public class PhysicsBody : MonoBehaviour
     [SerializeField]
     private Vector3 angularVelocity;
 
+    [SerializeField, Range(0f, 1f)]
+    private float restitution = 0.5f;
+
+    public float Restitution
+    {
+        get => restitution;
+        set => restitution = Mathf.Clamp01(value);
+    }
+    public void SetMass(float value)
+    {
+        mass = value;
+    }
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();

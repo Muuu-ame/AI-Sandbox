@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class CustomPhysicsSolver : MonoBehaviour
 {
+    private CollisionResolver collisionResolver = new();
     private readonly List<PhysicsBody> bodies = new();
 
     [SerializeField]
@@ -10,6 +11,12 @@ public class CustomPhysicsSolver : MonoBehaviour
 
     [Header("Collision Detection")]
     [SerializeField] private BroadPhaseManager broadPhaseManager;
+
+    [Header("Solver Settings")]
+    [SerializeField, Range(1, 50)]
+    private int solverIterations = 6;
+
+    private SequentialImpulseSolver impulseSolver = new();
 
     private CollisionDetector collisionDetector = new();
 
@@ -42,42 +49,48 @@ public class CustomPhysicsSolver : MonoBehaviour
     {
         if (deltaTime <= 0f) return;
 
+        // ① 物体の運動を更新
         foreach (PhysicsBody body in bodies)
         {
             if (body == null) continue;
 
-            // 重力を加速度に加算
             body.Acceleration += gravity;
 
-            // 加速度から速度を更新
             body.Velocity += body.Acceleration * deltaTime;
 
-            // 空気抵抗による減速
             body.Velocity *= Mathf.Max(
                 0f,
                 1f - body.LinearDamping * deltaTime
             );
 
-            // 速度から位置を更新
             body.transform.position += body.Velocity * deltaTime;
 
-            // 角速度の減衰
             body.AngularVelocity *= Mathf.Max(
                 0f,
                 1f - body.AngularDamping * deltaTime
             );
 
-            // 角速度から回転を更新
             body.transform.Rotate(
                 body.AngularVelocity * deltaTime,
                 Space.World
             );
 
-            // 加速度をリセット
             body.ResetAcceleration();
         }
+
+        // 衝突検出
         DetectCollisions();
+
+        // 位置補正（従来の処理を一旦維持）
+        foreach (CollisionInfo info in detectedCollisions)
+        {
+            collisionResolver.ResolvePosition(info);
+        }
+
+        // 速度応答（SequentialImpulseSolverに移管）
+        impulseSolver.Solve(detectedCollisions);
     }
+
     public void SetBodiesPhysicsMode(bool enabled)
     {
         foreach (PhysicsBody body in bodies)
