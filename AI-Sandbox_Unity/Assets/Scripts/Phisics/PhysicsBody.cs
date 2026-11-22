@@ -2,7 +2,12 @@ using UnityEngine;
 
 public class PhysicsBody : MonoBehaviour
 {
-    
+    [SerializeField, Range(0f, 2f)]
+    private float staticFriction = 0.6f;
+
+    [SerializeField, Range(0f, 2f)]
+    private float dynamicFriction = 0.4f;
+
     private Rigidbody rb;
     private bool originalKinematic;
 
@@ -108,5 +113,17 @@ public class PhysicsBody : MonoBehaviour
         if (Mathf.Approximately(mass, 0f)) return;
 
         angularVelocity += torque / Mathf.Abs(mass);
+    }
+
+    public float StaticFriction
+    {
+        get => staticFriction;
+        set => staticFriction = Mathf.Max(0f, value);
+    }
+
+    public float DynamicFriction
+    {
+        get => dynamicFriction;
+        set => dynamicFriction = Mathf.Max(0f, value);
     }
 }
