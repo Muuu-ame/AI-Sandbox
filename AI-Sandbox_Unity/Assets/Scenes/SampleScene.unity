@@ -682,6 +682,7 @@ GameObject:
   - component: {fileID: 786176352}
   - component: {fileID: 786176355}
   - component: {fileID: 786176354}
+  - component: {fileID: 786176356}
   m_Layer: 0
   m_Name: PhysicsManager
   m_TagString: Untagged
@@ -731,6 +732,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bcaf33f3e85837c49beb66de005f2c49, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CustomPhysicsSolver
+  gravity: {x: 0, y: -9.81, z: 0}
+  broadPhaseManager: {fileID: 0}
+  solverIterations: 6
 --- !u!114 &786176355
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -743,6 +747,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3498415896a24f49b7e966166095fb9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StandardPhysicsSolver
+--- !u!114 &786176356
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 786176351}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64085387e7546434a96aff7945e37640, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PhysicsBody
+  staticFriction: 0.6
+  dynamicFriction: 0.4
+  linearDamping: 0
+  angularDamping: 0
+  angularVelocity: {x: 0, y: 0, z: 0}
+  restitution: 0.5
+  mass: 1
+  velocity: {x: 0, y: 0, z: 0}
+  acceleration: {x: 0, y: 0, z: 0}
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -787,6 +812,50 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1327424102
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1327424104}
+  - component: {fileID: 1327424103}
+  m_Layer: 0
+  m_Name: AIManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1327424103
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1327424102}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9cab2d5e14f12304b9538ed6b7ebf3ce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AIClient
+--- !u!4 &1327424104
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1327424102}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.50505, y: 0.1, z: 0.50505}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1559,3 +1628,4 @@ SceneRoots:
   - {fileID: 786176353}
   - {fileID: 1965688628}
   - {fileID: 1871703316}
+  - {fileID: 1327424104}
