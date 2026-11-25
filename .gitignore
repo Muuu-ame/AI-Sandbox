@@ -16,6 +16,7 @@ AI-Sandbox_Unity/Recordings/
 .vs/
 .idea/
 .gradle/
+.env
 *.csproj
 *.sln
 *.slnx
