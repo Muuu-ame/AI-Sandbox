@@ -21,6 +21,10 @@ public class AICommandHandler : MonoBehaviour
                     $"未対応の命令です: {command.command}"
                 );
                 break;
+
+            case "delete_object":
+                DeleteObject(command.parameters);
+                break;
         }
     }
 
@@ -94,5 +98,33 @@ public class AICommandHandler : MonoBehaviour
         }
 
         Debug.Log($"オブジェクトを生成しました: {obj.ObjectID}");
+    }
+
+    private void DeleteObject(AICommandParameters parameters)
+    {
+        if (string.IsNullOrEmpty(parameters.target))
+        {
+            Debug.LogError("削除対象が指定されていません");
+            return;
+        }
+
+        if (GameManager.Instance == null)
+        {
+            Debug.LogError("GameManagerが見つかりません");
+            return;
+        }
+
+        ManagedObject obj =
+            GameManager.Instance.ObjectManager.FindObject(parameters.target);
+
+        if (obj == null)
+        {
+            Debug.LogWarning($"削除対象が見つかりません: {parameters.target}");
+            return;
+        }
+
+        GameManager.Instance.ObjectManager.DeleteObject(parameters.target);
+
+        Debug.Log($"オブジェクトを削除しました: {parameters.target}");
     }
 }

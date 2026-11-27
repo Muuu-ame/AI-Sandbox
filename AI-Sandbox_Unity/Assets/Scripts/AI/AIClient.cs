@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -28,6 +29,17 @@ public class AICommandParameters
 public class ChatRequest
 {
     public string message;
+    public List<WorldObjectInfo> objects;
+}
+
+[Serializable]
+public class WorldObjectInfo
+{
+    public string id;
+    public string shape;
+    public float[] position;
+    public float[] scale;
+    public string color;
 }
 
 public class AIClient : MonoBehaviour
@@ -41,9 +53,58 @@ public class AIClient : MonoBehaviour
 
     private IEnumerator SendRequest(string message)
     {
+        // 現在のワールド情報を取得
+        List<WorldObjectInfo> worldObjects =
+            new List<WorldObjectInfo>();
+
+        if (GameManager.Instance != null &&
+            GameManager.Instance.ObjectManager != null)
+        {
+            List<ManagedObject> objects =
+                GameManager.Instance.ObjectManager.GetAllObjects();
+
+            foreach (ManagedObject obj in objects)
+            {
+                if (obj == null) continue;
+
+                Vector3 pos = obj.transform.position;
+                Vector3 scale = obj.transform.localScale;
+
+                Renderer objectRenderer =
+                    obj.GetComponent<Renderer>();
+
+                string color = "unknown";
+
+                if (objectRenderer != null)
+                {
+                    color = "#" +
+                        ColorUtility.ToHtmlStringRGB(
+                            objectRenderer.sharedMaterial.color
+                        );
+                }
+
+                worldObjects.Add(new WorldObjectInfo
+                {
+                    id = obj.ObjectID,
+                    shape = "cube",
+                    position = new float[]
+                    {
+                        pos.x, pos.y, pos.z
+                    },
+                    scale = new float[]
+                    {
+                        scale.x, scale.y, scale.z
+                    },
+                    color = color
+                });
+            }
+        }
+
+        // リクエストデータ作成
         ChatRequest requestData = new ChatRequest
         {
-            message = message
+            message = message,
+            objects = worldObjects
         };
 
         string json = JsonUtility.ToJson(requestData);
@@ -52,8 +113,11 @@ public class AIClient : MonoBehaviour
         using (UnityWebRequest request =
             new UnityWebRequest(API_URL, "POST"))
         {
-            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-            request.downloadHandler = new DownloadHandlerBuffer();
+            request.uploadHandler =
+                new UploadHandlerRaw(bodyRaw);
+
+            request.downloadHandler =
+                new DownloadHandlerBuffer();
 
             request.SetRequestHeader(
                 "Content-Type",
@@ -64,49 +128,43 @@ public class AIClient : MonoBehaviour
 
             if (request.result == UnityWebRequest.Result.Success)
             {
-                string responseJson = request.downloadHandler.text;
+                string responseJson =
+                    request.downloadHandler.text;
 
                 Debug.Log("[Python] JSON Response: " + responseJson);
 
+                CommandResponse response = null;
+
                 try
                 {
-                    CommandResponse response =
+                    response =
                         JsonUtility.FromJson<CommandResponse>(
                             responseJson
                         );
-
-                    if (response == null || string.IsNullOrEmpty(response.command))
-                    {
-                        Debug.LogError("AIの命令を解析できませんでした");
-                        yield break;
-                    }
-
-                    AICommandHandler handler =
-                    FindFirstObjectByType<AICommandHandler>();
-
-                    if (handler == null)
-                    {
-                        Debug.LogError("AICommandHandlerが見つかりません");
-                        yield break;
-                    }
-
-                    handler.ExecuteCommand(response);
-
-                    if (response.parameters != null)
-                    {
-                        if (response.parameters.position != null)
-                            Debug.Log("Position: " + string.Join(", ", response.parameters.position));
-
-                        if (response.parameters.scale != null)
-                            Debug.Log("Scale: " + string.Join(", ", response.parameters.scale));
-
-                        Debug.Log("Color: " + response.parameters.color);
-                    }
                 }
                 catch (Exception e)
                 {
                     Debug.LogError("JSON解析エラー: " + e.Message);
+                    yield break;
                 }
+
+                if (response == null ||
+                    string.IsNullOrEmpty(response.command))
+                {
+                    Debug.LogError("AIの命令を解析できませんでした");
+                    yield break;
+                }
+
+                AICommandHandler handler =
+                    FindFirstObjectByType<AICommandHandler>();
+
+                if (handler == null)
+                {
+                    Debug.LogError("AICommandHandlerが見つかりません");
+                    yield break;
+                }
+
+                handler.ExecuteCommand(response);
             }
             else
             {
@@ -118,19 +176,15 @@ public class AIClient : MonoBehaviour
         }
     }
 
-    [ContextMenu("Test AI Command")]
-    private void TestAICommand()
+    [ContextMenu("Test Create")]
+    private void TestCreate()
     {
         SendMessageToAI("目の前に赤い大きな箱を作って");
     }
-    [ContextMenu("Test AI Command2")]
-    private void TestAICommand2()
+
+    [ContextMenu("Test Delete")]
+    private void TestDelete()
     {
-        SendMessageToAI("目の前の赤い大きな箱を軽くして");
-    }
-    [ContextMenu("Test AI Command3")]
-    private void TestAICommand3()
-    {
-        SendMessageToAI("目の前の赤い大きな箱を消して");
+        SendMessageToAI("赤い箱を消して");
     }
 }

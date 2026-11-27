@@ -1,24 +1,14 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 import ollama
 import json
-
-
-# ==========================================
-# FastAPI Application
-# ==========================================
 
 app = FastAPI(
     title="AI Sandbox API",
     description="AI Sandbox communication server",
-    version="0.3.0"
+    version="0.4.0"
 )
-
-
-# ==========================================
-# CORS Settings
-# ==========================================
 
 app.add_middleware(
     CORSMiddleware,
@@ -28,20 +18,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-# ==========================================
-# Request Model
-# ==========================================
-
 class ChatRequest(BaseModel):
     message: str
+    objects: list[dict] = Field(default_factory=list)
 
-
-# ==========================================
-# AI Settings
-# ==========================================
 
 MODEL_NAME = "qwen3:8b"
+
 
 SYSTEM_PROMPT = """
 あなたは3Dゲームの世界を操作するAIです。
@@ -49,74 +32,49 @@ SYSTEM_PROMPT = """
 ユーザーの自然言語による指示を解釈し、
 必ずJSON形式だけで返してください。
 
-説明文、Markdown、コードブロックは出力しないでください。
+説明文、Markdown、コードブロックは禁止です。
 
-使用できる命令は以下です。
+使用できる命令:
 
 1. create_object
-オブジェクトを生成する
+Cubeを生成する。
 
-2. set_gravity
-重力を変更する
-
-3. set_scale
-オブジェクトの大きさを変更する
-
-4. move_object
-オブジェクトを移動する
-
-JSON形式は以下に従ってください。
-
-オブジェクト生成の場合：
 {
-    "command": "create_object",
-    "parameters": {
-        "shape": "cube",
-        "position": [0, 1, 3],
-        "scale": [2, 2, 2],
-        "color": "red"
-    }
+  "command": "create_object",
+  "parameters": {
+    "shape": "cube",
+    "position": [0, 1, 3],
+    "scale": [2, 2, 2],
+    "color": "#FF0000"
+  }
 }
 
-重力変更の場合：
+2. delete_object
+指定されたオブジェクトを削除する。
+
 {
-    "command": "set_gravity",
-    "parameters": {
-        "value": -4.9
-    }
+  "command": "delete_object",
+  "parameters": {
+    "target": "対象のオブジェクトID"
+  }
 }
 
-大きさ変更の場合：
+削除対象は必ず現在のワールド情報から選んでください。
+
+存在しないIDを作ってはいけません。
+対象を一意に特定できない場合はunknownを返してください。
+
+3. unknown
+対応できない命令。
+
 {
-    "command": "set_scale",
-    "parameters": {
-        "target": "箱",
-        "scale": [3, 3, 3]
-    }
+  "command": "unknown",
+  "parameters": {}
 }
 
-移動の場合：
-{
-    "command": "move_object",
-    "parameters": {
-        "target": "箱",
-        "offset": [1, 0, 0]
-    }
-}
-
-判断できない場合や対応できない指示の場合：
-{
-    "command": "unknown",
-    "parameters": {}
-}
-
-必ずJSONとして正しく解釈できる形式で返してください。
+必ずJSONだけを返してください。
 """
 
-
-# ==========================================
-# Root Endpoint
-# ==========================================
 
 @app.get("/")
 def root():
@@ -126,18 +84,17 @@ def root():
     }
 
 
-# ==========================================
-# Chat Endpoint
-# ==========================================
-
 @app.post("/chat")
 def chat(data: ChatRequest):
-
-    user_message = data.message
-
-    print(f"[Unity] Received message: {user_message}")
+    print(f"[Unity] Received message: {data.message}")
+    print(f"[Unity] World objects: {len(data.objects)}")
 
     try:
+        world_info = json.dumps(
+            data.objects,
+            ensure_ascii=False
+        )
+
         response = ollama.chat(
             model=MODEL_NAME,
             messages=[
@@ -147,32 +104,63 @@ def chat(data: ChatRequest):
                 },
                 {
                     "role": "user",
-                    "content": user_message
+                    "content": (
+                        "現在のワールド情報:\n"
+                        + world_info
+                        + "\n\nユーザーの指示:\n"
+                        + data.message
+                    )
                 }
             ],
             format={
                 "type": "object",
                 "properties": {
                     "command": {
-                        "type": "string"
+                        "type": "string",
+                        "enum": [
+                            "create_object",
+                            "delete_object",
+                            "unknown"
+                        ]
                     },
                     "parameters": {
                         "type": "object"
                     }
                 },
-                "required": ["command", "parameters"]
+                "required": [
+                    "command",
+                    "parameters"
+                ]
             },
             options={
-            "temperature": 0
+                "temperature": 0
             }
         )
 
         ai_response = response["message"]["content"]
 
-        print(f"[Ollama] Response: {ai_response}")
+        print("[Ollama Raw Response]")
+        print(repr(ai_response))
 
-        # JSONとして解析
         command_data = json.loads(ai_response)
+
+        # 削除対象IDの検証
+        if command_data["command"] == "delete_object":
+            target = command_data["parameters"].get("target")
+
+            valid_ids = {
+                obj.get("id")
+                for obj in data.objects
+                if obj.get("id")
+            }
+
+            if target not in valid_ids:
+                command_data = {
+                    "command": "unknown",
+                    "parameters": {}
+                }
+
+        print("[Ollama] Response:", command_data)
 
         return command_data
 
